@@ -1,11 +1,10 @@
 #!/bin/bash
-for subj in {1..5}; do
+for subj in {01..05}; do
     echo $subj
     heudiconv \
-    -d /Users/ilkay.isik/Desktop/afford_analysis_test/dicom/{subject}/*dcm\
-    -s $subj \
-    -c dcm2niix \
-    -o /Users/ilkay.isik/Desktop/afford_analysis_test/nifti/ \
+    -d /Users/ilkay.isik/Desktop/afford_analysis_test/dicom/{subject}/*dcm \
+    -o /Users/ilkay.isik/Desktop/afford_analysis_test/nifti/sub-$subj \
     -f /Users/ilkay.isik/Desktop/afford_analysis_test/afford_heuristic.py \
-    -b
+    -c dcm2niix \
+    -s $subj -b
 done
