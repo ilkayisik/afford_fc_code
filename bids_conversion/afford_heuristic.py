@@ -24,7 +24,7 @@ def infotodict(seqinfo):
     # Anatomicals
     t1 = create_key('anat/sub-{subject}_T1w')
 
-    # Functional (video runs)
+    # Functional
     afford = create_key('func/sub-{subject}_task-afford_run-{item:02d}_bold')
     # Functional (rest)
     rest = create_key('func/sub-{subject}_task-rest_run-{item:02d}_bold')
