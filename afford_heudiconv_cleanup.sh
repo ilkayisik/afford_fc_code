@@ -1,6 +1,6 @@
 #!/bin/bash
 # to delete the unnecessary files created by heudiconv
-root='/Users/ilkay.isik/project_folder_temp/fc_content/MRI_data/data_BIDS/Nifti/'
+root='/Users/ilkay.isik/Projects/afford_fc/mri_data/bids'
 cd $root
 rm sub-*/func/*pfobloc_run-01_events.tsv
 cp sub-01/sub-01_task-pfobloc_run-01_events.tsv sub-*/func/sub-01_task-pfobloc_run-01_events.tsv
@@ -52,23 +52,33 @@ for subj in {01..10}; do
 done
 
 # how many files are in fmap folder for each subject?
-for subj in {01..26}; do
+for subj in {01..41}; do
   echo $subj
   ls -1q sub-$subj/fmap/*.nii.gz | wc -l
+  ls -1q sub-$subj/func/*.nii.gz | wc -l
   for fname in $(ls sub-$subj/fmap/*.nii.gz); do
     echo $fname
   done
 done
 
-
-
+# Unfortunately rest file does not have fmap...
+# copy the PA_run-05_epi for the rest Run and name it PA_run-06_epi
+cd $root
+for sub in {03..41}; do
+  echo $sub
+  cp sub-${sub}/fmap/sub-${sub}_dir-PA_run-05_epi.nii.gz sub-${sub}/fmap/sub-${sub}_dir-PA_run-06_epi.nii.gz
+  cp sub-${sub}/fmap/sub-${sub}_dir-PA_run-05_epi.json sub-${sub}/fmap/sub-${sub}_dir-PA_run-06_epi.json
+  tsv_file=$(ls sub-$sub/*_scans.tsv) # where the bold info comes from
+  echo $tsv_file
+  echo "fmap/sub-${sub}_dir-PA_run-06_epi.nii.gz" >> $tsv_file
+done
 
 
 # To modify the fmap json files: # add total readout time, change phase enc dir,
 # intended for values with the right bold scan name
-root=/Users/ilkay.isik/project_folder_temp/fc_content/MRI_data/BIDS/Nifti
+root='/Users/ilkay.isik/Projects/afford_fc/mri_data/bids'
 cd $root
-for sub in {01..26}; do
+for sub in {02..04}; do
   echo $sub
   tsv_file=$(ls sub-$sub/*_scans.tsv) # where the bold info comes from
   echo $tsv_file
@@ -76,11 +86,10 @@ for sub in {01..26}; do
     echo $jfname
     fmap_name=${jfname:23:9} #PA_run-01
     echo $fmap_name
-    # extract the bold scan comes right after the fmap
-    bold_name=$(grep -A1 "$fmap_name" $tsv_file|grep -v "$fmap_name"|sed 's/2018.*//')
-    echo $bold_name
+    # extract the bold scan comes right before the fmap
+    bold_name=$(grep -B1 "$fmap_name" $tsv_file|grep -v "$fmap_name"|sed 's/2015.*//')
+    # echo $bold_name
     bold_name=${bold_name::-1}
-    echo $bold_name
     # write this value back to the fmap .json file
     tempfile=$(mktemp -u)
     jq '.PhaseEncodingDirection="j"' $jfname > "$tempfile"
@@ -99,40 +108,13 @@ done # end sub
 
 
 
-## not using this anymore because the better way is done and working!!!
-
-# modify the json files for the fmaps
-# easier but not good method: need to make sure the fmap is really intended for that run
-# copy sub-01's json files from fmap to other subjects fmap folders and rename them
-root=/Users/ilkay.isik/project_folder_temp/fc_content/MRI_data/BIDS/Nifti
-for subj in {02..10}; do
-  echo $subj
-  rm sub-$subj/fmap/*.json
-  cp sub-01/fmap/*.json sub-$subj/fmap/
-  cd sub-$subj/fmap
-  rename "s/01/$subj/" *.json
-  cd $root
-done
-
-# change the value of subject number in intended for key in the json file
-for sub in {02..10}; do
-  echo $sub
-  for jsonfile in $(ls sub-$sub/fmap/*.json); do
-     echo $jsonfile
-     tempfile=$(mktemp -u)
-     jq --arg sub "$sub" '.IntendedFor|=(.|sub("(?<=sub-)[^_]+";$sub))' "$jsonfile" > "$tempfile"
-     mv "$tempfile" "$jsonfile"
-  done
-done
-
-
 # put the pfob task onset file to every subj bids dir
 for sub in {02..26}; do
   echo $sub
   cp sub-01/func/sub-01_task-pfobloc_run-01_events.tsv sub-${sub}/func/sub-${sub}_task-pfobloc_run-01_events.tsv
 done
 
-# copy the tsv file for video run from sub 01's folder to the othet subs folder
+# copy the tsv file for video run from sub 01's folder to the other subs folder
 for sub in {02..26}; do
   echo $sub
   run=1
