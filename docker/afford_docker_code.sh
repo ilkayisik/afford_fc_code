@@ -10,9 +10,10 @@ docker run -ti --rm \
      participant \
      --participant-label sub-$subj \
      --fs-no-reconall \
-     --ignore slicetiming fieldmaps \
+     --ignore slicetimFAM68far+*
+     ing \
      --output-space T1w template \
      --use-aroma \
      --write-graph \
-     --nthreads 2 --n_cpus 3 --mem_mb 27000
+     --nthreads 2 --n_cpus 3 --mem_mb 26000
 done
